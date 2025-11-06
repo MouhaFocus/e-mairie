@@ -1,0 +1,133 @@
+'use client'
+
+import { useState, Suspense } from 'react'
+import { signInWithEmail } from '@/lib/actions/auth'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Mail } from 'lucide-react'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+
+function LoginForm() {
+  const [email, setEmail] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get('redirect') || '/app'
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setIsLoading(true)
+    setError(null)
+
+    const result = await signInWithEmail(email, redirect)
+
+    if (result.error) {
+      setError(result.error)
+      setIsLoading(false)
+    } else {
+      setEmailSent(true)
+      setIsLoading(false)
+    }
+  }
+
+  if (emailSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-blue-50 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <div className="h-16 w-16 rounded-full bg-teal-100 flex items-center justify-center">
+                <Mail className="h-8 w-8 text-teal-600" />
+              </div>
+            </div>
+            <CardTitle className="text-center">Vérifiez votre email</CardTitle>
+            <CardDescription className="text-center">
+              Nous avons envoyé un lien magique à <strong>{email}</strong>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              Cliquez sur le lien dans l'email pour vous connecter. Le lien expire dans 1 heure.
+            </p>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setEmailSent(false)
+                setEmail('')
+              }}
+            >
+              Utiliser une autre adresse
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-blue-50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">Connexion</CardTitle>
+          <CardDescription className="text-center">
+            Entrez votre email pour recevoir un lien de connexion
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Adresse email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="votre.email@exemple.fr"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Envoi en cours...' : 'Envoyer le lien magique'}
+            </Button>
+
+            <div className="text-center text-sm text-muted-foreground">
+              <Link href="/" className="hover:text-teal-600 transition-colors">
+                ← Retour à l'accueil
+              </Link>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-blue-50 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Chargement...</CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
+  )
+}
+

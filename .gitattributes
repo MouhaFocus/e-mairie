@@ -1,0 +1,24 @@
+# Git attributes pour optimiser le repository
+# Fichiers qui seront compressés différemment
+
+# Fichiers texte normaux
+*.ts text
+*.tsx text
+*.js text
+*.jsx text
+*.json text
+*.css text
+*.md text
+*.sql text
+
+# package-lock.json peut être gros mais est nécessaire
+package-lock.json text
+
+# Ne pas compresser les fichiers binaires (images, etc.)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg text
+*.ico binary
+
