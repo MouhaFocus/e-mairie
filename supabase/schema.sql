@@ -94,7 +94,7 @@ CREATE POLICY "Users can update own profile"
 CREATE POLICY "Agents and admins can view all profiles"
   ON public.profiles
   FOR SELECT
-  USING (auth.user_role() IN ('agent', 'admin'));
+  USING (public.user_role() IN ('agent', 'admin'));
 
 -- New users can insert their profile
 CREATE POLICY "Users can insert own profile"
@@ -116,7 +116,7 @@ CREATE POLICY "Citizens can view own requests"
 CREATE POLICY "Agents and admins can view all requests"
   ON public.requests
   FOR SELECT
-  USING (auth.user_role() IN ('agent', 'admin'));
+  USING (public.user_role() IN ('agent', 'admin'));
 
 -- Citizens can insert their own requests
 CREATE POLICY "Citizens can insert own requests"
@@ -128,7 +128,7 @@ CREATE POLICY "Citizens can insert own requests"
 CREATE POLICY "Only agents and admins can update requests"
   ON public.requests
   FOR UPDATE
-  USING (auth.user_role() IN ('agent', 'admin'));
+  USING (public.user_role() IN ('agent', 'admin'));
 
 -- ============================================
 -- REQUEST EVENTS POLICIES
@@ -150,20 +150,21 @@ CREATE POLICY "Citizens can view own request events"
 CREATE POLICY "Agents and admins can view all request events"
   ON public.request_events
   FOR SELECT
-  USING (auth.user_role() IN ('agent', 'admin'));
+  USING (public.user_role() IN ('agent', 'admin'));
 
 -- Only agents and admins can insert request events
 CREATE POLICY "Only agents and admins can insert request events"
   ON public.request_events
   FOR INSERT
-  WITH CHECK (auth.user_role() IN ('agent', 'admin'));
+  WITH CHECK (public.user_role() IN ('agent', 'admin'));
 
 -- ============================================
 -- FUNCTIONS
 -- ============================================
 
 -- Helper function to get user role (bypasses RLS to avoid recursion)
-CREATE OR REPLACE FUNCTION auth.user_role()
+-- Note: Created in public schema because we can't create functions in auth schema in production
+CREATE OR REPLACE FUNCTION public.user_role()
 RETURNS TEXT AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid()
 $$ LANGUAGE sql SECURITY DEFINER STABLE;

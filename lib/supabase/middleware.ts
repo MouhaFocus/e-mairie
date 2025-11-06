@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { Database } from './types'
+import type { UserRole } from './types'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -64,7 +65,7 @@ export async function updateSession(request: NextRequest) {
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single()
+      .single() as { data: { role: UserRole } | null, error: any }
 
     console.log('👤 Middleware - User:', user.id)
     console.log('📋 Profile data:', profile)
@@ -100,7 +101,7 @@ export async function updateSession(request: NextRequest) {
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single()
+      .single() as { data: { role: UserRole } | null }
 
     console.log('🔀 Login page accessed by logged-in user - redirecting based on role')
 

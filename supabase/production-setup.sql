@@ -81,7 +81,8 @@ ALTER TABLE public.request_events ENABLE ROW LEVEL SECURITY;
 -- ============================================
 -- HELPER FUNCTION (Pour éviter la récursion RLS)
 -- ============================================
-CREATE OR REPLACE FUNCTION auth.user_role()
+-- Note: Créée dans public car on ne peut pas créer de fonctions dans auth en production
+CREATE OR REPLACE FUNCTION public.user_role()
 RETURNS TEXT AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid()
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
@@ -109,7 +110,7 @@ DROP POLICY IF EXISTS "Agents and admins can view all profiles" ON public.profil
 CREATE POLICY "Agents and admins can view all profiles"
   ON public.profiles
   FOR SELECT
-  USING (auth.user_role() IN ('agent', 'admin'));
+  USING (public.user_role() IN ('agent', 'admin'));
 
 -- New users can insert their profile
 DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
@@ -134,7 +135,7 @@ DROP POLICY IF EXISTS "Agents and admins can view all requests" ON public.reques
 CREATE POLICY "Agents and admins can view all requests"
   ON public.requests
   FOR SELECT
-  USING (auth.user_role() IN ('agent', 'admin'));
+  USING (public.user_role() IN ('agent', 'admin'));
 
 -- Citizens can insert their own requests
 DROP POLICY IF EXISTS "Citizens can insert own requests" ON public.requests;
@@ -148,7 +149,7 @@ DROP POLICY IF EXISTS "Only agents and admins can update requests" ON public.req
 CREATE POLICY "Only agents and admins can update requests"
   ON public.requests
   FOR UPDATE
-  USING (auth.user_role() IN ('agent', 'admin'));
+  USING (public.user_role() IN ('agent', 'admin'));
 
 -- ============================================
 -- REQUEST EVENTS POLICIES
@@ -172,14 +173,14 @@ DROP POLICY IF EXISTS "Agents and admins can view all request events" ON public.
 CREATE POLICY "Agents and admins can view all request events"
   ON public.request_events
   FOR SELECT
-  USING (auth.user_role() IN ('agent', 'admin'));
+  USING (public.user_role() IN ('agent', 'admin'));
 
 -- Only agents and admins can insert request events
 DROP POLICY IF EXISTS "Only agents and admins can insert request events" ON public.request_events;
 CREATE POLICY "Only agents and admins can insert request events"
   ON public.request_events
   FOR INSERT
-  WITH CHECK (auth.user_role() IN ('agent', 'admin'));
+  WITH CHECK (public.user_role() IN ('agent', 'admin'));
 
 -- ============================================
 -- FUNCTIONS
@@ -236,5 +237,6 @@ BEGIN
   RAISE NOTICE '📋 Prochaines étapes:';
   RAISE NOTICE '   1. Créer un utilisateur admin dans Authentication';
   RAISE NOTICE '   2. Exécuter: UPDATE public.profiles SET role = ''admin'' WHERE id = (SELECT id FROM auth.users WHERE email = ''votre-email@admin.fr'');';
+  RAISE NOTICE '✅ Fonction public.user_role() créée pour éviter la récursion RLS';
 END $$;
 

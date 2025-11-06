@@ -33,8 +33,25 @@ Ce guide vous accompagne étape par étape pour déployer votre application sur 
 
 ### 1.3 Appliquer le schéma de base de données
 
+**Option A : Avec Supabase CLI (Recommandé)** ⭐
+
+Voir le guide détaillé : **[DEPLOY_SUPABASE_CLI.md](./DEPLOY_SUPABASE_CLI.md)**
+
+```bash
+# 1. Se connecter à Supabase
+supabase login
+
+# 2. Lier votre projet
+supabase link --project-ref PROJECT_REF
+
+# 3. Pousser les migrations
+supabase db push
+```
+
+**Option B : Manuellement avec SQL Editor**
+
 1. Allez dans **SQL Editor** dans Supabase
-2. Copiez le contenu de `supabase/schema.sql`
+2. Copiez le contenu de `supabase/production-setup.sql`
 3. Collez-le dans l'éditeur SQL
 4. Cliquez sur **"Run"** pour exécuter le script
 5. Vérifiez que toutes les tables ont été créées :
@@ -42,16 +59,17 @@ Ce guide vous accompagne étape par étape pour déployer votre application sur 
    - `requests`
    - `request_events`
 
-### 1.4 Appliquer les migrations
+### 1.4 Vérifier les migrations
 
-1. Dans **SQL Editor**, exécutez également le contenu de :
-   - `supabase/migrations/20250101000000_initial_schema.sql`
-   - `supabase/migrations/20250103000000_fix_rls_recursion.sql`
+Si vous utilisez Supabase CLI :
+```bash
+supabase migration list
+```
 
-2. Vérifiez que la fonction `auth.user_role()` existe :
-   ```sql
-   SELECT auth.user_role();
-   ```
+Sinon, vérifiez manuellement que la fonction `auth.user_role()` existe :
+```sql
+SELECT auth.user_role();
+```
 
 ### 1.5 Configurer les policies RLS
 

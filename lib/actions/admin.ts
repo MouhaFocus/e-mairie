@@ -2,6 +2,7 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import type { UserRole } from '@/lib/supabase/types'
 
 /**
  * Create a new agent or admin user
@@ -29,7 +30,7 @@ export async function createAgent(data: {
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single()
+    .single() as { data: { role: UserRole } | null }
 
   if (profile?.role !== 'admin') {
     return { error: 'Accès non autorisé. Seuls les administrateurs peuvent créer des agents.' }
@@ -62,8 +63,8 @@ export async function createAgent(data: {
     }
 
     // Create profile with specified role
-    const { error: profileError } = await supabase
-      .from('profiles')
+    const { error: profileError } = await (supabase
+      .from('profiles') as any)
       .insert({
         id: newUser.user.id,
         full_name: data.full_name,
@@ -107,7 +108,7 @@ export async function updateAgentRole(agentId: string, newRole: 'agent' | 'admin
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single()
+    .single() as { data: { role: UserRole } | null }
 
   if (profile?.role !== 'admin') {
     return { error: 'Accès non autorisé' }
@@ -118,8 +119,8 @@ export async function updateAgentRole(agentId: string, newRole: 'agent' | 'admin
     return { error: 'Vous ne pouvez pas modifier votre propre rôle' }
   }
 
-  const { error } = await supabase
-    .from('profiles')
+  const { error } = await (supabase
+    .from('profiles') as any)
     .update({ role: newRole })
     .eq('id', agentId)
 
@@ -151,7 +152,7 @@ export async function deleteAgent(agentId: string) {
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single()
+    .single() as { data: { role: UserRole } | null }
 
   if (profile?.role !== 'admin') {
     return { error: 'Accès non autorisé' }
@@ -165,8 +166,8 @@ export async function deleteAgent(agentId: string) {
   // Note: Due to ON DELETE CASCADE, deleting the auth user will also delete the profile
   // But we can't delete auth users with regular client, only with admin API
   // For now, we'll just update the role to 'citizen' as a soft delete
-  const { error } = await supabase
-    .from('profiles')
+  const { error } = await (supabase
+    .from('profiles') as any)
     .update({ role: 'citizen' })
     .eq('id', agentId)
 

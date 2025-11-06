@@ -3,6 +3,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import type { UserRole } from '@/lib/supabase/types'
 
 export async function signInWithPassword(email: string, password: string) {
   const supabase = await createServerSupabaseClient()
@@ -22,7 +23,7 @@ export async function signInWithPassword(email: string, password: string) {
       .from('profiles')
       .select('id, role')
       .eq('id', data.user.id)
-      .single()
+      .single() as { data: { id: string, role: UserRole } | null }
 
     if (!profile) {
       await (supabase.from('profiles') as any).insert({
@@ -89,15 +90,21 @@ export async function signInWithEmail(email: string, redirectTo?: string) {
   return { success: true }
 }
 
-export async function signOut(redirectTo: string = '/') {
+async function performSignOut(redirectTo: string = '/') {
   const supabase = await createServerSupabaseClient()
   await supabase.auth.signOut()
   revalidatePath('/', 'layout')
   redirect(redirectTo)
 }
 
+// For use in forms (Next.js expects FormData parameter)
+export async function signOut() {
+  return performSignOut('/')
+}
+
+// For use in forms (Next.js expects FormData parameter)
 export async function signOutAdmin() {
-  return signOut('/admin-login')
+  return performSignOut('/admin-login')
 }
 
 export async function updateProfile(data: {

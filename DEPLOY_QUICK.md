@@ -6,13 +6,27 @@ Guide condensé pour déployer rapidement sur Vercel + Supabase.
 
 ### 1. Supabase (5 minutes)
 
+**Option A : Avec Supabase CLI (Recommandé)** ⭐
+
+```bash
+1. Créer projet sur https://supabase.com
+2. Récupérer: Project URL, anon key, service_role key, Project REF
+3. supabase login
+4. supabase link --project-ref PROJECT_REF
+5. supabase db push
+6. Authentication → Créer admin → Mettre role='admin' en SQL
+```
+
+**Option B : Manuellement**
+
 ```bash
 1. Créer projet sur https://supabase.com
 2. Récupérer: Project URL, anon key, service_role key
-3. SQL Editor → Exécuter supabase/schema.sql
-4. SQL Editor → Exécuter supabase/migrations/*.sql
-5. Authentication → Créer admin → Mettre role='admin' en SQL
+3. SQL Editor → Exécuter supabase/production-setup.sql
+4. Authentication → Créer admin → Mettre role='admin' en SQL
 ```
+
+📖 **Guide complet CLI** : [DEPLOY_SUPABASE_CLI.md](./DEPLOY_SUPABASE_CLI.md)
 
 ### 2. GitHub (2 minutes)
 
